@@ -12,12 +12,16 @@ public class SwordTest : MonoBehaviour
         public Vector3 rotation;
     }
 
-    public List<SwordTransform> sworldTransforms;
+    GameObject sword;
+
+    public float speed = 100.0f;
+    public List<SwordTransform> swordTransforms;
     int curCount = 0;
 
-    bool isPlayed = false;
+    public bool isPlayed = false;
 
-    GameObject sword;
+    Vector3 dir;
+    float dis;
 
     void Start()
     {
@@ -28,24 +32,47 @@ public class SwordTest : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-            //Play();
-            Debug.Log(sword.transform.rotation);
+            Play();
+            Debug.Log("play");
         }
 
         if (isPlayed)
         {
-            if (curCount == sworldTransforms.Count) isPlayed = false;
+            sword.transform.localPosition += dir * speed * Time.deltaTime;
+
+            sword.transform.localRotation = Quaternion.Euler((((speed * Time.deltaTime) / dis) * swordTransforms[curCount].rotation) + sword.transform.localRotation.eulerAngles);
+
+            float curdis = Vector3.Distance(swordTransforms[curCount - 1].position, sword.transform.localPosition);
+            if (curdis > dis)
+            {
+                curCount++;
+                if (curCount != swordTransforms.Count)
+                {
+                    MovePointSet();
+                }
+                else
+                {
+                    isPlayed = false;
+                }
+            }
         }
     }
 
     void Play()
     {
         if (isPlayed) return;
-        if (sworldTransforms.Count == 0) return;
+        if (swordTransforms.Count == 0) return;
 
-        curCount = 0;
         isPlayed = true;
-        sword.transform.position = sworldTransforms[0].position;
-        sword.transform.rotation = Quaternion.Euler(sworldTransforms[0].rotation);
+        sword.transform.localPosition = swordTransforms[0].position;
+        sword.transform.rotation = Quaternion.Euler(swordTransforms[0].rotation);
+        curCount = 1;
+        MovePointSet();
+    }
+
+    void MovePointSet()
+    {
+        dir = (swordTransforms[curCount].position - sword.transform.localPosition).normalized;
+        dis = Vector3.Distance(swordTransforms[curCount].position, sword.transform.localPosition);
     }
 }
